@@ -28,7 +28,7 @@ html,body{height:100%;margin:0;background:var(--bg);overflow:hidden;touch-action
 #gb,#sp{z-index:6}
 </style></head><body><canvas id="c"></canvas>
 <div id="mp"><span id="rt">Solo</span><button id="bn">Ajak teman</button><input id="ci" maxlength="6" placeholder="kode"><button id="bj">Gabung</button></div>
-<div id="gar"><div id="gtop"><b>🏁 GARASI</b><span id="gc"></span></div><div id="gtabs"><button data-t="veh">🚗 Kendaraan</button><button data-t="mod">🔧 Modif</button><button data-t="trk">🛣️ Lintasan</button><button data-t="mp">👥 Teman</button></div><div id="gbody"></div><div id="gfoot"><span id="gmsg"></span><a id="don" href="https://saweria.co/Wongbagus212" target="_blank" rel="noopener noreferrer">☕ Dukung</a><button id="gst">🏁 MULAI BALAP</button></div></div>
+<div id="gar"><div id="gtop"><b>🏁 GARASI</b><span id="gc"></span></div><div id="gtabs"><button data-t="veh">🚗 Kendaraan</button><button data-t="mod">🔧 Modif</button><button data-t="trk">🛣️ Lintasan</button><button data-t="adm">🔑 Admin</button><button data-t="mp">👥 Teman</button></div><div id="gbody"></div><div id="gfoot"><span id="gmsg"></span><a id="don" href="https://saweria.co/Wongbagus212" target="_blank" rel="noopener noreferrer">☕ Dukung</a><button id="gst">🏁 MULAI BALAP</button></div></div>
 <button id="gb">⚙️</button>
 <div id="sp"><div><span>Setir</span><button data-k="w" data-d="-1">⬅️</button><button data-k="w" data-d="1">➡️</button></div><div><span>Gas</span><button data-k="g" data-d="-1">⬅️</button><button data-k="g" data-d="1">➡️</button></div><div><span>Rem</span><button data-k="b" data-d="-1">⬅️</button><button data-k="b" data-d="1">➡️</button></div><div><button id="sw">🔁 Tukar kiri/kanan</button></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -263,7 +263,7 @@ if(gtab==='veh')VEH.forEach((v,i)=>{const own=SAVE.own.includes(i);h+=`<div clas
 else if(gtab==='mod'){const m=modOf(),v=VEH[SAVE.veh];h+=`<b>${v.n}</b>`;[['e','Mesin','+5% kecepatan, +12% akselerasi'],['t','Ban','+10% grip'],['b','Rem','+12% pengereman']].forEach(([k,nm,ds])=>{const l=m[k],c=200*(l+1);h+=`<div class='it'><div><b>${nm}</b> ${'●'.repeat(l)+'○'.repeat(3-l)}<br><small>${ds}</small></div><button data-a='mod' data-k='${k}' ${l>=3||SAVE.coins<c?'disabled':''}>${l>=3?'MAX':'Upgrade '+c}</button></div>`});
 h+=`<div class='it'><div><b>Cat</b><br>${PAINT.map(c=>`<span class='sw' data-a='paint' data-c='${c}' style='background:${c}'></span>`).join('')}</div></div><div class='it'><div><b>Spoiler</b></div><button data-a='spoil'>${SAVE.spoil[SAVE.veh]?'Lepas':'Pasang'}</button></div>`}
 else if(gtab==='trk')TRACKS.forEach((t,i)=>{h+=`<div class='it'><div><b>${t.n}</b><br><small>${t.k==='Jalan'?'Balap jalan raya · lalu lintas padat':'Balap sirkuit · lawan mobil balap'}</small></div><button data-a='trk' data-i='${i}' ${SAVE.track===i?'disabled':''}>${SAVE.track===i?'Dipilih':'Pilih'}</button></div>`});
-gbody.innerHTML=h;if(gtab==='mp'){mpEl.style.display='flex';gbody.appendChild(mpEl)}}
+if(gtab==='adm')h=admHtml();gbody.innerHTML=h;if(gtab==='mp'){mpEl.style.display='flex';gbody.appendChild(mpEl)}}
 gbody.onclick=e=>{const el=e.target.closest('[data-a]');if(!el)return;const a=el.dataset.a;
 if(a==='veh'){const i=+el.dataset.i;if(!SAVE.own.includes(i)){SAVE.coins-=VEH[i].p;SAVE.own.push(i)}SAVE.veh=i}
 else if(a==='mod'){const m=modOf(),k=el.dataset.k,c=200*(m[k]+1);if(m[k]<3&&SAVE.coins>=c){SAVE.coins-=c;m[k]++}}
@@ -274,6 +274,13 @@ save();renderGar()};
 document.getElementById('gtabs').onclick=e=>{const b=e.target.closest('button');if(b){gtab=b.dataset.t;renderGar()}};
 document.getElementById('gst').onclick=()=>{snd();applyVeh();if(loaded!==SAVE.track)loadTrack(SAVE.track);init();started=true;over=false;gmsg.textContent=''};
 function earn(){const e=Math.floor(score/3)+lap*50;SAVE.coins+=e;save();gmsg.textContent='+'+e+' koin · skor '+Math.floor(score)+' · Suka game ini? Tap ☕ Dukung';renderGar()}
+const ADMH='5d69fca806bbaa51695a0c32c0368d0bfa1b5b58422318996f8de00570d31dff';
+async function sha(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function admHtml(){return SAVE.admin?`<div class='it'><div><b>Mode Admin aktif</b><br><small>Semua mobil, modif, dan lintasan terbuka</small></div></div><div class='it'><div>Tambah koin</div><button id='adc'>+100000</button></div><div class='it'><div>Reset semua data game</div><button id='adr'>Reset</button></div>`:`<div class='it'><input id='adi' type='password' placeholder='Kode admin' style='flex:1;min-width:0;padding:8px;border-radius:8px;border:0'><button id='adb'>Buka</button></div><small id='adm'></small>`}
+gbody.addEventListener('click',async e=>{const id=e.target.id;
+if(id==='adb'){const v=document.getElementById('adi').value.trim();if(await sha(v)===ADMH){SAVE.admin=1;SAVE.own=[0,1,2,3,4];SAVE.coins=Math.max(SAVE.coins,999999);VEH.forEach((_,i)=>SAVE.mods[i]={e:3,t:3,b:3});save();renderGar()}else document.getElementById('adm').textContent='Kode salah'}
+else if(id==='adc'){SAVE.coins+=100000;save();renderGar()}
+else if(id==='adr'){try{localStorage.removeItem('bksave')}catch(_){}location.reload()}});
 applyVeh();renderGar();
 let lt=0;function loop(t){const dt=Math.min(.05,(t-lt)/1000||0);lt=t;upd(dt);render3d(t);hud();pres(t);gar.style.display=(!started||over)?'flex':'none';requestAnimationFrame(loop)}
 requestAnimationFrame(loop);
